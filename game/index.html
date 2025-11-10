@@ -1,0 +1,1696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Pedro Wallet Tracker 🦝💎</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
+    <script src="https://unpkg.com/tonweb@0.0.66/dist/tonweb.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: white;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 100%;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .tabs-container {
+            display: flex;
+            gap: 8px;
+            padding: 20px;
+            padding-top: 110px;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px;
+            border-radius: 25px;
+            font-size: 15px;
+            font-weight: 700;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: transparent;
+            color: #6b7b8c;
+            border: none;
+        }
+
+        .tab.active {
+            background: white;
+            color: #0a1e2e;
+        }
+
+        .content-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .top-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 20px;
+            background: linear-gradient(135deg, rgba(26, 26, 46, 0.95) 0%, rgba(22, 33, 62, 0.95) 100%);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+        }
+
+        .pedro-corner-image {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 5px solid #ffd700;
+            overflow: hidden;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+            flex-shrink: 0;
+        }
+
+        .pedro-corner-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .wallet-icon-container {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 40px;
+            position: relative;
+        }
+
+        .wallet-icon-circle {
+            width: 100%;
+            height: 100%;
+            border: 2px dashed #2a4a5e;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: rotate-slow 20s linear infinite;
+        }
+
+        .wallet-icon {
+            width: 50px;
+            height: 50px;
+            background: #1e3a4a;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+        }
+
+        .connect-heading {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 28px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 16px;
+        }
+
+        .connect-description {
+            font-size: 15px;
+            color: #8b9baa;
+            line-height: 1.6;
+            max-width: 340px;
+            margin: 0 auto 40px;
+        }
+
+        .connect-button {
+            background: #0098ea;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 16px 40px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: calc(100% - 40px);
+            max-width: 400px;
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .connect-button:hover {
+            background: #0087d1;
+            transform: translateY(-2px);
+        }
+
+        .connect-button:active {
+            transform: translateY(0);
+        }
+
+        .wallet-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .wallet-address {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 12px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .address-text {
+            font-size: 14px;
+            font-weight: 600;
+            color: white;
+            font-family: 'Courier New', monospace;
+        }
+
+        .icon-button {
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            border-radius: 10px;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 18px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .icon-button:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: scale(1.05);
+        }
+
+        .icon-button:active {
+            transform: scale(0.95);
+        }
+
+        .disconnect-button {
+            background: rgba(220, 53, 69, 0.2);
+            color: #ff6b7a;
+            border: none;
+            border-radius: 10px;
+            padding: 10px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .disconnect-button:hover {
+            background: rgba(220, 53, 69, 0.35);
+            transform: scale(1.05);
+        }
+
+        .disconnect-button:active {
+            transform: scale(0.95);
+        }
+
+        @keyframes rotate-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .header {
+            margin-bottom: 30px;
+            animation: fadeIn 0.8s ease-in;
+        }
+
+        .logo {
+            font-size: 80px;
+            margin-bottom: 10px;
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: #aaa;
+            margin-bottom: 30px;
+        }
+
+        .wallet-section {
+            display: none;
+        }
+
+        #tonconnect-button {
+            margin: 20px auto;
+        }
+
+        .balance-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 24px;
+            margin-top: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .balance-label {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .balance-amount {
+            font-size: 40px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #ffffff;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .balance-usd {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.5);
+            font-weight: 500;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .stat-box {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.2s ease;
+        }
+
+        .stat-box:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .stat-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            border-top-color: rgba(100, 181, 246, 0.8);
+            animation: spin 1s linear infinite;
+        }
+
+        .info-box {
+            background: rgba(100, 181, 246, 0.08);
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 20px;
+            border-left: 3px solid rgba(100, 181, 246, 0.5);
+            text-align: left;
+        }
+
+        .info-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
+        }
+
+        .copy-contract-btn {
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            border-radius: 8px;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 16px;
+            backdrop-filter: blur(10px);
+            flex-shrink: 0;
+        }
+
+        .copy-contract-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: scale(1.05);
+        }
+
+        .copy-contract-btn:active {
+            transform: scale(0.95);
+        }
+
+        @keyframes shine {
+            0% {
+                box-shadow: 0 8px 24px rgba(255, 215, 0, 0.5), 0 4px 12px rgba(0, 0, 0, 0.3);
+            }
+            50% {
+                box-shadow: 0 8px 32px rgba(255, 215, 0, 0.9), 0 4px 16px rgba(255, 215, 0, 0.5), 0 0 40px rgba(255, 215, 0, 0.6);
+            }
+            100% {
+                box-shadow: 0 8px 24px rgba(255, 215, 0, 0.5), 0 4px 12px rgba(0, 0, 0, 0.3);
+            }
+        }
+
+        .sticky-buy-btn {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #ffd700 0%, #ffb700 100%);
+            border: none;
+            border-radius: 16px;
+            padding: 18px 24px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 18px;
+            font-weight: 800;
+            color: #1a1a2e;
+            cursor: pointer;
+            z-index: 1000;
+            box-shadow: 0 8px 24px rgba(255, 215, 0, 0.5), 0 4px 12px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            animation: shine 2s ease-in-out infinite;
+        }
+
+        .sticky-buy-btn:hover {
+            background: linear-gradient(135deg, #ffed4e 0%, #ffd700 100%);
+            box-shadow: 0 12px 32px rgba(255, 215, 0, 0.7), 0 6px 16px rgba(0, 0, 0, 0.4);
+            transform: translateY(-4px);
+            animation: none;
+        }
+
+        .sticky-buy-btn:active {
+            transform: translateY(-2px);
+        }
+
+        .info-text {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.6);
+            line-height: 1.6;
+        }
+
+        .trade-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            margin-bottom: 16px;
+        }
+
+        .trade-card-header {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .trade-card-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 8px;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .trade-card-value.green {
+            color: #4ade80;
+        }
+
+        .trade-card-value.red {
+            color: #ef4444;
+        }
+
+        .trade-card-subtitle {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .trade-stats-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .explore-bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(26, 26, 46, 0.95);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .explore-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            padding: 8px 12px;
+            border-radius: 8px;
+        }
+
+        .explore-nav-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .explore-nav-item.active {
+            background: rgba(255, 215, 0, 0.1);
+        }
+
+        .explore-nav-icon {
+            font-size: 24px;
+        }
+
+        .explore-nav-label {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .explore-nav-item.active .explore-nav-label {
+            color: #FFD700;
+        }
+
+        .explore-nav-item.active .explore-nav-icon {
+            color: #FFD700;
+        }
+
+        .profile-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            margin-bottom: 16px;
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .profile-picture {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: 700;
+            color: #000;
+            flex-shrink: 0;
+        }
+
+        .profile-info {
+            flex: 1;
+        }
+
+        .profile-name {
+            font-size: 20px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 4px;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .profile-username {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .profile-section-title {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.5);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .profile-section-value {
+            font-size: 14px;
+            color: #ffffff;
+            word-break: break-all;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            font-family: monospace;
+        }
+
+        .profile-connect-btn {
+            background: linear-gradient(135deg, #1DA1F2, #0D8BD9);
+            border: none;
+            padding: 14px 24px;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.2s ease;
+            margin-top: 12px;
+        }
+
+        .profile-connect-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(29, 161, 242, 0.3);
+        }
+
+        .profile-connected {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px;
+            background: rgba(29, 161, 242, 0.1);
+            border-radius: 8px;
+            margin-top: 12px;
+        }
+
+        .leaderboard-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .leaderboard-rank {
+            font-size: 20px;
+            font-weight: 700;
+            color: #FFD700;
+            min-width: 40px;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .leaderboard-rank.top1 {
+            color: #FFD700;
+            font-size: 24px;
+        }
+
+        .leaderboard-rank.top2 {
+            color: #C0C0C0;
+            font-size: 22px;
+        }
+
+        .leaderboard-rank.top3 {
+            color: #CD7F32;
+            font-size: 22px;
+        }
+
+        .leaderboard-info {
+            flex: 1;
+        }
+
+        .leaderboard-address {
+            font-size: 14px;
+            color: #ffffff;
+            font-family: monospace;
+            margin-bottom: 4px;
+        }
+
+        .leaderboard-volume {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .leaderboard-medal {
+            font-size: 28px;
+        }
+
+        .ranking-badge {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .ranking-badge-title {
+            font-size: 12px;
+            color: rgba(0, 0, 0, 0.7);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .ranking-badge-value {
+            font-size: 24px;
+            font-weight: 800;
+            color: #000;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .explore-intro {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .explore-intro-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #FFD700;
+            margin-bottom: 12px;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .explore-intro-text {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.6;
+        }
+
+        .pedro-quote {
+            font-style: italic;
+            color: rgba(255, 255, 255, 0.7);
+            margin-top: 20px;
+            font-size: 14px;
+            padding: 16px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            text-align: center;
+            line-height: 1.5;
+        }
+
+        .gold-club-card {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(255, 165, 0, 0.15) 100%);
+            border-radius: 16px;
+            padding: 24px;
+            margin-top: 20px;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            box-shadow: 0 8px 32px rgba(255, 215, 0, 0.2);
+            animation: goldGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes goldGlow {
+            0%, 100% {
+                box-shadow: 0 8px 32px rgba(255, 215, 0, 0.2);
+            }
+            50% {
+                box-shadow: 0 8px 40px rgba(255, 215, 0, 0.35);
+            }
+        }
+
+        .gold-club-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .gold-club-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        
+        .gold-club-btn-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            object-fit: cover;
+            vertical-align: middle;
+            margin-left: 6px;
+        }
+
+        .gold-club-title {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 20px;
+            font-weight: 700;
+            color: #ffd700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .gold-club-message {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 20px;
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        .join-gold-club-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+            color: #1a1a2e;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            font-family: 'Montserrat', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+        }
+
+        .join-gold-club-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
+        }
+
+        .join-gold-club-btn:active {
+            transform: translateY(0);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        footer {
+            margin-top: 30px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        /* Splash Screen Styles */
+        .splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .splash-screen.fade-out {
+            animation: fadeOut 0.5s ease-out forwards;
+        }
+
+        .pedro-image-container {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 8px solid #ffd700;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+            margin-bottom: 30px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .pedro-image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .splash-text {
+            max-width: 300px;
+            text-align: center;
+            padding: 0 20px;
+        }
+
+        .splash-title {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 24px;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 15px;
+            line-height: 1.4;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .splash-subtitle {
+            font-size: 16px;
+            color: #aaa;
+            line-height: 1.6;
+        }
+
+        .loading-section {
+            margin-top: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 215, 0, 0.2);
+            border-top: 4px solid #ffd700;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .progress-checkers {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            min-width: 250px;
+        }
+
+        .checker-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+            color: #aaa;
+            letter-spacing: 0.5px;
+        }
+
+        .checker-icon {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #555;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .checker-icon.loading {
+            border-color: #ffd700;
+            animation: pulse-border 1.5s ease-in-out infinite;
+        }
+
+        .checker-icon.complete {
+            border-color: #4CAF50;
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .checker-item.active {
+            color: white;
+        }
+
+        .checker-item.complete {
+            color: #4CAF50;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+            }
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 0 50px rgba(255, 215, 0, 0.8);
+            }
+        }
+
+        @keyframes pulse-border {
+            0%, 100% {
+                border-color: #ffd700;
+                box-shadow: 0 0 0 rgba(255, 215, 0, 0.4);
+            }
+            50% {
+                border-color: #ffed4e;
+                box-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
+            }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+
+        .main-content {
+            display: none;
+        }
+
+        .main-content.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- Splash Screen -->
+    <div class="splash-screen" id="splash-screen">
+        <div class="pedro-image-container">
+            <img src="pedro.jpg" alt="Pedro The Raccoon">
+        </div>
+        <div class="splash-text">
+            <div class="splash-title">Track your PEDRO balance and trading journey in real time</div>
+        </div>
+        
+        <div class="loading-section">
+            <div class="spinner"></div>
+            <div class="progress-checkers">
+                <div class="checker-item" id="telegram-check">
+                    <div class="checker-icon loading" id="telegram-icon"></div>
+                    <span>Telegram Authorization</span>
+                </div>
+                <div class="checker-item" id="portfolio-check">
+                    <div class="checker-icon" id="portfolio-icon"></div>
+                    <span>Portfolio Loading</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sticky Top Header -->
+    <div class="top-header">
+        <!-- Pedro Image Left -->
+        <div class="pedro-corner-image">
+            <img src="pedro.jpg" alt="Pedro">
+        </div>
+
+        <!-- Wallet Controls Right (Address, Copy & Disconnect) -->
+        <div class="wallet-header hidden" id="wallet-header">
+            <div class="wallet-address">
+                <span class="address-text" id="wallet-address-display">0x00...0000</span>
+            </div>
+            <button class="icon-button" id="copy-address-btn" title="Copy wallet address">📋</button>
+            <button class="disconnect-button" id="disconnect-btn">Disconnect</button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container main-content" id="main-content">
+
+        <!-- Tabs -->
+        <div class="tabs-container">
+            <button class="tab active" id="portfolio-tab">PORTFOLIO</button>
+            <button class="tab" id="explore-tab">EXPLORE</button>
+        </div>
+
+        <!-- Portfolio Content (Connect Wallet) -->
+        <div class="content-wrapper hidden" id="portfolio-content">
+            
+            <div class="wallet-icon-container">
+                <div class="wallet-icon-circle">
+                    <div class="wallet-icon">💎</div>
+                </div>
+            </div>
+            
+            <h2 class="connect-heading">Connect your wallet</h2>
+            <p class="connect-description">Connect your TON wallet to see your $PEDRO balance and track your trading journey</p>
+            
+            <div id="tonconnect-button" style="display: none;"></div>
+            <button class="connect-button" id="connect-wallet-btn">Connect Wallet</button>
+        </div>
+
+        <!-- Wallet Connected View (Portfolio Tab Only) -->
+        <div class="content-wrapper hidden" id="wallet-connected-view" style="padding-top: 0; padding-bottom: 80px;">
+            <div class="balance-card">
+                <div class="balance-label">YOUR $PEDRO BALANCE</div>
+                <div class="balance-amount" id="token-balance">
+                    <span class="loading"></span>
+                </div>
+                <div class="balance-usd" id="usd-value">~ $0.00</div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-label">PEDRO Price</div>
+                    <div class="stat-value" id="token-price">$0.00</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Market Cap</div>
+                    <div class="stat-value" id="market-cap">$0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Holders</div>
+                    <div class="stat-value" id="holder-count">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">24h Volume</div>
+                    <div class="stat-value" id="volume-24h">$0</div>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <div class="info-title">💎 Token Info</div>
+                <div class="info-text">
+                    <strong>Contract:</strong><br>
+                    <div style="display: flex; align-items: center; gap: 8px; margin-top: 8px;">
+                        <span id="contract-address" style="font-size: 11px; word-break: break-all; flex: 1;">EQBGtsm26tdn6bRjZrmLZkZMqk-K8wd4R66k52ntPU4UzcV0</span>
+                        <button class="copy-contract-btn" id="copy-contract-btn" title="Copy contract address">⎘</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pedro-quote" id="pedro-quote">
+                "Let's see how much you're holding, fam! 💎🦝"
+            </div>
+
+            <!-- Gold Club Eligibility (1M+ holders) -->
+            <div class="gold-club-card hidden" id="gold-club-section">
+                <div class="gold-club-header">
+                    <img src="gold-club-badge.jpeg" alt="Gold Club" class="gold-club-icon">
+                    <div class="gold-club-title">Pedro Gold Club</div>
+                </div>
+                <div class="gold-club-message">
+                    🎉 Congratulations! You are eligible to join the exclusive Pedro Gold Club for elite holders!
+                </div>
+                <button class="join-gold-club-btn" id="join-gold-club-btn">
+                    Join Gold Club <img src="gold-club-badge.jpeg" alt="Gold Club" class="gold-club-btn-icon">
+                </button>
+            </div>
+        </div>
+
+        <!-- Sticky Buy Pedro Button (Shows only when wallet connected) -->
+        <button class="sticky-buy-btn hidden" id="sticky-buy-btn">
+            Buy $PEDRO
+        </button>
+
+        <!-- Explore Content (Connect Wallet Prompt) -->
+        <div class="content-wrapper hidden" id="explore-content">
+            <div class="wallet-icon-container">
+                <div class="wallet-icon-circle">
+                    <div class="wallet-icon">📊</div>
+                </div>
+            </div>
+            <h2 class="connect-heading">Explore Your Trading</h2>
+            <p class="connect-description">Connect your wallet to view your trading analytics, volume, and ranking among other traders</p>
+            
+            <div id="tonconnect-button-explore" style="display: none;"></div>
+            <button class="connect-button" id="connect-wallet-explore-btn">Connect Wallet</button>
+        </div>
+
+        <!-- Explore Connected View (Shows after wallet connects) -->
+        <div class="content-wrapper hidden" id="explore-connected-view" style="padding-top: 0; padding-bottom: 120px;">
+            
+            <!-- Intro Section -->
+            <div class="explore-intro">
+                <div class="explore-intro-title">🎯 Time to Start Trading!</div>
+                <div class="explore-intro-text">
+                    Trade $PEDRO, climb the leaderboard, and win amazing prizes! Every trade counts toward your ranking. The more you trade, the higher you climb! 🚀
+                </div>
+            </div>
+
+            <!-- Total Volume Card -->
+            <div class="trade-card">
+                <div class="trade-card-header">📊 Total Trading Volume</div>
+                <div class="trade-card-value" id="total-volume">$0</div>
+                <div class="trade-card-subtitle">Lifetime trading activity</div>
+            </div>
+
+            <!-- Buy/Sell Stats Row -->
+            <div class="trade-stats-row">
+                <!-- Purchases Card -->
+                <div class="trade-card">
+                    <div class="trade-card-header">📈 Purchases</div>
+                    <div class="trade-card-value green" id="buy-count">0</div>
+                    <div class="trade-card-subtitle" id="buy-volume">$0 USD</div>
+                </div>
+
+                <!-- Sales Card -->
+                <div class="trade-card">
+                    <div class="trade-card-header">📉 Sales</div>
+                    <div class="trade-card-value red" id="sell-count">0</div>
+                    <div class="trade-card-subtitle" id="sell-volume">$0 USD</div>
+                </div>
+            </div>
+
+            <!-- Ranking Badge -->
+            <div class="ranking-badge">
+                <div class="ranking-badge-title">Your Trader Ranking</div>
+                <div class="ranking-badge-value" id="trader-ranking">Top 50%</div>
+            </div>
+
+            <div class="pedro-quote" style="margin-top: 20px;">
+                "Keep trading and climb that leaderboard, champ! 🏆🦝"
+            </div>
+
+            <!-- Floating Bottom Navigation -->
+            <div class="explore-bottom-nav">
+                <div class="explore-nav-item active" id="nav-home">
+                    <div class="explore-nav-icon" style="color: white;">⌂</div>
+                    <div class="explore-nav-label">Home</div>
+                </div>
+                <div class="explore-nav-item" id="nav-tasks">
+                    <div class="explore-nav-icon" style="color: white;">✓</div>
+                    <div class="explore-nav-label">Tasks</div>
+                </div>
+                <div class="explore-nav-item" id="nav-leaderboard">
+                    <div class="explore-nav-icon" style="color: white;">★</div>
+                    <div class="explore-nav-label">Leaderboard</div>
+                </div>
+                <div class="explore-nav-item" id="nav-profile">
+                    <div class="explore-nav-icon" style="color: white;">●</div>
+                    <div class="explore-nav-label">Profile</div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Leaderboard Page -->
+        <div class="content-wrapper hidden" id="leaderboard-view" style="padding-top: 0; padding-bottom: 120px;">
+            <div class="explore-intro">
+                <div class="explore-intro-title">🏆 Top Traders Leaderboard</div>
+                <div class="explore-intro-text">
+                    The biggest $PEDRO traders in the game! Keep trading to climb the ranks and earn your spot among the legends! 💎
+                </div>
+            </div>
+
+            <div id="leaderboard-list">
+                <!-- Leaderboard items will be dynamically inserted here -->
+            </div>
+
+            <!-- Floating Bottom Navigation -->
+            <div class="explore-bottom-nav">
+                <div class="explore-nav-item" id="nav-home-leaderboard">
+                    <div class="explore-nav-icon" style="color: white;">⌂</div>
+                    <div class="explore-nav-label">Home</div>
+                </div>
+                <div class="explore-nav-item" id="nav-tasks-leaderboard">
+                    <div class="explore-nav-icon" style="color: white;">✓</div>
+                    <div class="explore-nav-label">Tasks</div>
+                </div>
+                <div class="explore-nav-item active" id="nav-leaderboard-leaderboard">
+                    <div class="explore-nav-icon" style="color: white;">★</div>
+                    <div class="explore-nav-label">Leaderboard</div>
+                </div>
+                <div class="explore-nav-item" id="nav-profile-leaderboard">
+                    <div class="explore-nav-icon" style="color: white;">●</div>
+                    <div class="explore-nav-label">Profile</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Page -->
+        <div class="content-wrapper hidden" id="profile-view" style="padding-top: 0; padding-bottom: 120px;">
+            <div class="profile-card">
+                <!-- Telegram User Info -->
+                <div class="profile-header">
+                    <div class="profile-picture" id="profile-picture">P</div>
+                    <div class="profile-info">
+                        <div class="profile-name" id="profile-name">Loading...</div>
+                        <div class="profile-username" id="profile-username">@username</div>
+                    </div>
+                </div>
+
+                <!-- Wallet Address Section -->
+                <div style="margin-bottom: 20px;">
+                    <div class="profile-section-title">🦝 Wallet Address</div>
+                    <div class="profile-section-value" id="profile-wallet">Not connected</div>
+                </div>
+
+                <!-- X Account Section -->
+                <div>
+                    <div class="profile-section-title">🐦 X Account</div>
+                    
+                    <!-- Not Connected State -->
+                    <div id="x-connect-section">
+                        <button class="profile-connect-btn" id="connect-x-btn">
+                            <span style="font-size: 18px; margin-right: 8px;">🐦</span>
+                            Connect X Account
+                        </button>
+                    </div>
+                    
+                    <!-- Connected State -->
+                    <div id="x-connected-section" class="hidden" style="display: flex; align-items: center; gap: 12px; padding: 12px; background: rgba(29, 161, 242, 0.1); border-radius: 8px; margin-top: 12px;">
+                        <div style="flex: 1;">
+                            <div style="font-size: 14px; color: #1DA1F2; font-weight: 600;" id="x-username">@username</div>
+                            <div style="font-size: 12px; color: rgba(255,255,255,0.6);">Connected</div>
+                        </div>
+                        <button style="background: rgba(239,68,68,0.2); color: #ef4444; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 13px;" id="disconnect-x-btn">
+                            Disconnect
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pedro-quote">
+                "Stay connected, fam! Your profile is looking fresh! 🦝💎"
+            </div>
+
+            <!-- Floating Bottom Navigation -->
+            <div class="explore-bottom-nav">
+                <div class="explore-nav-item" id="nav-home-profile">
+                    <div class="explore-nav-icon" style="color: white;">⌂</div>
+                    <div class="explore-nav-label">Home</div>
+                </div>
+                <div class="explore-nav-item" id="nav-tasks-profile">
+                    <div class="explore-nav-icon" style="color: white;">✓</div>
+                    <div class="explore-nav-label">Tasks</div>
+                </div>
+                <div class="explore-nav-item" id="nav-leaderboard-profile">
+                    <div class="explore-nav-icon" style="color: white;">★</div>
+                    <div class="explore-nav-label">Leaderboard</div>
+                </div>
+                <div class="explore-nav-item active" id="nav-profile-profile">
+                    <div class="explore-nav-icon" style="color: white;">●</div>
+                    <div class="explore-nav-label">Profile</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tasks Page (Placeholder) -->
+        <div class="content-wrapper hidden" id="tasks-view" style="padding-top: 0; padding-bottom: 120px;">
+            <div class="explore-intro">
+                <div class="explore-intro-title">✓ Tasks & Rewards</div>
+                <div class="explore-intro-text">
+                    Complete tasks to earn rewards and boost your $PEDRO journey! More tasks coming soon! 🚀
+                </div>
+            </div>
+
+            <div class="pedro-quote" style="margin-top: 40px;">
+                "Tasks are coming soon, boss! Stay tuned for epic rewards! 🦝💎"
+            </div>
+
+            <!-- Floating Bottom Navigation -->
+            <div class="explore-bottom-nav">
+                <div class="explore-nav-item" id="nav-home-tasks">
+                    <div class="explore-nav-icon" style="color: white;">⌂</div>
+                    <div class="explore-nav-label">Home</div>
+                </div>
+                <div class="explore-nav-item active" id="nav-tasks-tasks">
+                    <div class="explore-nav-icon" style="color: white;">✓</div>
+                    <div class="explore-nav-label">Tasks</div>
+                </div>
+                <div class="explore-nav-item" id="nav-leaderboard-tasks">
+                    <div class="explore-nav-icon" style="color: white;">★</div>
+                    <div class="explore-nav-label">Leaderboard</div>
+                </div>
+                <div class="explore-nav-item" id="nav-profile-tasks">
+                    <div class="explore-nav-icon" style="color: white;">●</div>
+                    <div class="explore-nav-label">Profile</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="wallet.js"></script>
+    <script>
+        // Tab switching
+        // Track which tabs have been loaded to prevent unnecessary reloading
+        let portfolioLoaded = false;
+        let exploreLoaded = false;
+
+        document.getElementById('portfolio-tab').addEventListener('click', function() {
+            // Don't reload if already on this tab
+            if (document.getElementById('portfolio-tab').classList.contains('active')) {
+                return;
+            }
+            
+            document.getElementById('portfolio-tab').classList.add('active');
+            document.getElementById('explore-tab').classList.remove('active');
+            
+            // Hide ALL explore content and sub-views
+            document.getElementById('explore-content').classList.add('hidden');
+            document.getElementById('explore-connected-view').classList.add('hidden');
+            document.getElementById('leaderboard-view').classList.add('hidden');
+            document.getElementById('profile-view').classList.add('hidden');
+            document.getElementById('tasks-view').classList.add('hidden');
+            
+            // Show appropriate portfolio view based on wallet state
+            if (window.currentWalletAddress) {
+                document.getElementById('portfolio-content').classList.add('hidden');
+                document.getElementById('wallet-connected-view').classList.remove('hidden');
+                // Show sticky buy button when on portfolio tab with wallet connected
+                document.getElementById('sticky-buy-btn').classList.remove('hidden');
+                
+                // Only load once when switching to this tab
+                if (!portfolioLoaded) {
+                    portfolioLoaded = true;
+                }
+            } else {
+                document.getElementById('portfolio-content').classList.remove('hidden');
+                document.getElementById('wallet-connected-view').classList.add('hidden');
+                // Hide sticky buy button when wallet not connected
+                document.getElementById('sticky-buy-btn').classList.add('hidden');
+            }
+        });
+
+        document.getElementById('explore-tab').addEventListener('click', function() {
+            // Don't reload if already on this tab
+            if (document.getElementById('explore-tab').classList.contains('active')) {
+                return;
+            }
+            
+            document.getElementById('explore-tab').classList.add('active');
+            document.getElementById('portfolio-tab').classList.remove('active');
+            
+            // Hide all portfolio views
+            document.getElementById('portfolio-content').classList.add('hidden');
+            document.getElementById('wallet-connected-view').classList.add('hidden');
+            
+            // Hide sticky buy button when not on portfolio tab
+            document.getElementById('sticky-buy-btn').classList.add('hidden');
+            
+            // Show appropriate explore view based on wallet state
+            if (window.currentWalletAddress) {
+                document.getElementById('explore-content').classList.add('hidden');
+                document.getElementById('explore-connected-view').classList.remove('hidden');
+                
+                // Only fetch trading data once when first switching to explore tab
+                if (!exploreLoaded && typeof fetchTradingData === 'function') {
+                    exploreLoaded = true;
+                    fetchTradingData(window.currentWalletAddress);
+                }
+            } else {
+                document.getElementById('explore-content').classList.remove('hidden');
+                document.getElementById('explore-connected-view').classList.add('hidden');
+            }
+        });
+
+        // Connect wallet button on Explore tab
+        document.getElementById('connect-wallet-explore-btn').addEventListener('click', function() {
+            // Trigger the actual TON Connect button
+            document.querySelector('#tonconnect-button button').click();
+        });
+
+        // Connect wallet button
+        document.getElementById('connect-wallet-btn').addEventListener('click', function() {
+            // Trigger TON Connect
+            const tonConnectButton = document.querySelector('#tonconnect-button button');
+            if (tonConnectButton) {
+                tonConnectButton.click();
+            }
+        });
+
+        // Disconnect wallet button
+        document.getElementById('disconnect-btn').addEventListener('click', async function() {
+            if (window.tonConnectUI) {
+                await window.tonConnectUI.disconnect();
+            }
+        });
+
+        // Copy address button
+        document.getElementById('copy-address-btn').addEventListener('click', function() {
+            if (window.currentWalletAddress) {
+                navigator.clipboard.writeText(window.currentWalletAddress).then(() => {
+                    // Show feedback
+                    const btn = document.getElementById('copy-address-btn');
+                    const originalText = btn.textContent;
+                    btn.textContent = '✓';
+                    setTimeout(() => {
+                        btn.textContent = originalText;
+                    }, 1500);
+                });
+            }
+        });
+
+        // Buy $PEDRO button - open DeDust exchange
+        document.getElementById('sticky-buy-btn').addEventListener('click', function() {
+            // Open DeDust exchange for PEDRO trading
+            const dedust_url = 'https://dedust.io/swap/TON/PEDRO';
+            window.open(dedust_url, '_blank');
+        });
+
+        // Bottom Navigation Logic - All pages
+        function hideAllPages() {
+            // Hide bottom nav pages
+            document.getElementById('explore-connected-view').classList.add('hidden');
+            document.getElementById('leaderboard-view').classList.add('hidden');
+            document.getElementById('profile-view').classList.add('hidden');
+            document.getElementById('tasks-view').classList.add('hidden');
+            
+            // Also hide portfolio/explore tab content
+            document.getElementById('portfolio-content').classList.add('hidden');
+            document.getElementById('wallet-connected-view').classList.add('hidden');
+            document.getElementById('explore-content').classList.add('hidden');
+        }
+
+        function showHomePage() {
+            hideAllPages();
+            document.getElementById('explore-connected-view').classList.remove('hidden');
+            // Fetch trading data if wallet is connected
+            if (window.currentWalletAddress && typeof fetchTradingData === 'function') {
+                fetchTradingData(window.currentWalletAddress);
+            }
+        }
+
+        function showTasksPage() {
+            hideAllPages();
+            document.getElementById('tasks-view').classList.remove('hidden');
+        }
+
+        function showLeaderboardPage() {
+            hideAllPages();
+            document.getElementById('leaderboard-view').classList.remove('hidden');
+            // Load leaderboard data
+            if (typeof loadLeaderboard === 'function') {
+                loadLeaderboard();
+            }
+        }
+
+        function showProfilePage() {
+            hideAllPages();
+            document.getElementById('profile-view').classList.remove('hidden');
+            // Update profile data
+            if (typeof loadProfileData === 'function') {
+                loadProfileData();
+            }
+        }
+
+        // Navigation from Explore page
+        document.getElementById('nav-home').addEventListener('click', showHomePage);
+        document.getElementById('nav-tasks').addEventListener('click', showTasksPage);
+        document.getElementById('nav-leaderboard').addEventListener('click', showLeaderboardPage);
+        document.getElementById('nav-profile').addEventListener('click', showProfilePage);
+
+        // Navigation from Leaderboard page
+        document.getElementById('nav-home-leaderboard').addEventListener('click', showHomePage);
+        document.getElementById('nav-tasks-leaderboard').addEventListener('click', showTasksPage);
+        document.getElementById('nav-leaderboard-leaderboard').addEventListener('click', showLeaderboardPage);
+        document.getElementById('nav-profile-leaderboard').addEventListener('click', showProfilePage);
+
+        // Navigation from Profile page
+        document.getElementById('nav-home-profile').addEventListener('click', showHomePage);
+        document.getElementById('nav-tasks-profile').addEventListener('click', showTasksPage);
+        document.getElementById('nav-leaderboard-profile').addEventListener('click', showLeaderboardPage);
+        document.getElementById('nav-profile-profile').addEventListener('click', showProfilePage);
+
+        // Navigation from Tasks page
+        document.getElementById('nav-home-tasks').addEventListener('click', showHomePage);
+        document.getElementById('nav-tasks-tasks').addEventListener('click', showTasksPage);
+        document.getElementById('nav-leaderboard-tasks').addEventListener('click', showLeaderboardPage);
+        document.getElementById('nav-profile-tasks').addEventListener('click', showProfilePage);
+
+        // Wallet address copy functionality on Profile page
+        document.getElementById('profile-wallet').addEventListener('click', function() {
+            if (window.currentWalletAddress) {
+                navigator.clipboard.writeText(window.currentWalletAddress).then(() => {
+                    const originalText = this.textContent;
+                    this.textContent = '✓ Copied!';
+                    this.style.background = 'rgba(34, 197, 94, 0.2)';
+                    setTimeout(() => {
+                        this.textContent = originalText;
+                        this.style.background = 'rgba(0, 0, 0, 0.2)';
+                    }, 2000);
+                }).catch(err => {
+                    console.error('Failed to copy:', err);
+                });
+            }
+        });
+
+        // X Account Connection
+        document.getElementById('connect-x-btn').addEventListener('click', function() {
+            const username = prompt('Enter your X (Twitter) username (without @):');
+            if (username && username.trim()) {
+                const cleanUsername = username.trim().replace('@', '');
+                localStorage.setItem('pedro_x_account', cleanUsername);
+                if (typeof loadProfileData === 'function') {
+                    loadProfileData();
+                }
+            }
+        });
+
+        // X Account Disconnection
+        document.getElementById('disconnect-x-btn').addEventListener('click', function() {
+            if (confirm('Disconnect your X account?')) {
+                localStorage.removeItem('pedro_x_account');
+                if (typeof loadProfileData === 'function') {
+                    loadProfileData();
+                }
+            }
+        });
+
+    </script>
+    <script>
+        // Loading sequence with checkers
+        function completeChecker(checkerId, iconId) {
+            const checker = document.getElementById(checkerId);
+            const icon = document.getElementById(iconId);
+            
+            icon.classList.remove('loading');
+            icon.classList.add('complete');
+            icon.innerHTML = '✓';
+            checker.classList.add('complete');
+            checker.classList.remove('active');
+        }
+
+        function startChecker(checkerId, iconId) {
+            const checker = document.getElementById(checkerId);
+            const icon = document.getElementById(iconId);
+            
+            checker.classList.add('active');
+            icon.classList.add('loading');
+        }
+
+        // Simulate loading sequence
+        setTimeout(() => {
+            // Complete Telegram authorization
+            completeChecker('telegram-check', 'telegram-icon');
+            
+            // Start portfolio loading
+            startChecker('portfolio-check', 'portfolio-icon');
+        }, 800);
+
+        setTimeout(() => {
+            // Complete portfolio loading
+            completeChecker('portfolio-check', 'portfolio-icon');
+        }, 1800);
+
+        // Auto-hide splash screen after loading completes (4 seconds)
+        setTimeout(() => {
+            const splash = document.getElementById('splash-screen');
+            const mainContent = document.getElementById('main-content');
+            
+            splash.classList.add('fade-out');
+            
+            setTimeout(async () => {
+                splash.style.display = 'none';
+                mainContent.classList.add('show');
+                
+                // Show Portfolio tab first
+                const portfolioTab = document.getElementById('portfolio-tab');
+                const exploreTab = document.getElementById('explore-tab');
+                
+                // Activate Portfolio tab
+                portfolioTab.classList.add('active');
+                exploreTab.classList.remove('active');
+                
+                // Hide ALL explore views
+                document.getElementById('explore-content').classList.add('hidden');
+                document.getElementById('explore-connected-view').classList.add('hidden');
+                document.getElementById('leaderboard-view').classList.add('hidden');
+                document.getElementById('profile-view').classList.add('hidden');
+                document.getElementById('tasks-view').classList.add('hidden');
+                
+                // Check if wallet is already connected and restore UI state
+                if (window.tonConnectUI && window.tonConnectUI.wallet) {
+                    console.log('Wallet already connected on startup, restoring state');
+                    document.getElementById('portfolio-content').classList.add('hidden');
+                    document.getElementById('wallet-connected-view').classList.remove('hidden');
+                    document.getElementById('sticky-buy-btn').classList.remove('hidden');
+                    
+                    // Trigger wallet connected handler to update all UI elements
+                    if (typeof handleWalletConnected === 'function') {
+                        await handleWalletConnected(window.tonConnectUI.wallet);
+                    }
+                } else {
+                    console.log('No wallet connected on startup, showing connect prompt');
+                    document.getElementById('portfolio-content').classList.remove('hidden');
+                    document.getElementById('wallet-connected-view').classList.add('hidden');
+                }
+                
+                console.log('Portfolio page loaded first');
+            }, 500);
+        }, 4000);
+    </script>
+</body>
+</html>
